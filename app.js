@@ -1,3 +1,8 @@
+// Asegura que el navegador no salte a una posición previa al recargar
+if ('scrollRestoration' in history) {
+  history.scrollRestoration = 'manual';
+}
+
 const PHONE_NUMBER = '5493757504214';
 const BUSINESS_TIMEZONE = 'America/Argentina/Buenos_Aires';
 const HERO_BEST_SELLER_IDS = [4, 3, 1];
@@ -931,6 +936,9 @@ function handleCheckout() {
 }
 
 async function init() {
+  // Forzar scroll al tope al iniciar antes de cargar contenido pesado
+  window.scrollTo(0, 0);
+
   await loadMenu();
   reconcileCartWithMenu();
   renderStatusBadge();
