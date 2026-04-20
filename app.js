@@ -642,7 +642,7 @@ function renderMenu() {
   setupScrollSpy();
 }
 
-function setActiveCategory(categoryId) {
+function setActiveCategory(categoryId, shouldScroll = true) {
   if (!categoryId || categoryId === activeCategoryId) return;
 
   activeCategoryId = categoryId;
@@ -650,7 +650,9 @@ function setActiveCategory(categoryId) {
     const isActive = link.dataset.categoryId === categoryId;
     link.classList.toggle('active', isActive);
 
-    if (isActive) {
+    // Solo hacemos scroll a la categoría en la barra de navegación 
+    // si NO es la carga inicial, para evitar que la página principal salte.
+    if (isActive && shouldScroll) {
       link.scrollIntoView({
         behavior: 'smooth',
         inline: 'center',
@@ -661,6 +663,7 @@ function setActiveCategory(categoryId) {
 }
 
 function setupScrollSpy() {
+  let isFirstRun = true;
   const handleScroll = () => {
     const visibleSections = [...document.querySelectorAll('.menu-category-section')].filter(section => !section.hidden);
     if (!visibleSections.length) return;
@@ -674,7 +677,8 @@ function setupScrollSpy() {
       }
     });
 
-    setActiveCategory(currentCategoryId);
+    setActiveCategory(currentCategoryId, !isFirstRun);
+    isFirstRun = false;
   };
 
   window.onscroll = handleScroll;
@@ -936,9 +940,6 @@ function handleCheckout() {
 }
 
 async function init() {
-  // Forzar scroll al tope al iniciar antes de cargar contenido pesado
-  window.scrollTo(0, 0);
-
   await loadMenu();
   reconcileCartWithMenu();
   renderStatusBadge();
@@ -946,6 +947,9 @@ async function init() {
   renderMenu();
   updateCart();
   syncOrderModeFields();
+
+  // Forzar el scroll al inicio después de que todo el contenido se haya renderizado
+  window.scrollTo(0, 0);
 
   document.getElementById('currentYear').textContent = new Date().getFullYear();
 
