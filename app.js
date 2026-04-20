@@ -1,5 +1,16 @@
 const PHONE_NUMBER = '5493757504214';
 const BUSINESS_TIMEZONE = 'America/Argentina/Buenos_Aires';
+const HERO_BEST_SELLER_IDS = [4, 3, 1];
+const ITEM_BADGES = {
+  3: [{ label: 'Más pedido', tone: 'popular' }],
+  4: [{ label: 'Más pedido', tone: 'popular' }],
+  17: [{ label: 'Nuevo', tone: 'new' }],
+  20: [{ label: 'Nuevo', tone: 'new' }],
+  27: [{ label: 'Promo', tone: 'promo' }],
+  28: [{ label: 'Promo', tone: 'promo' }],
+  29: [{ label: 'Promo', tone: 'promo' }],
+  30: [{ label: 'Promo', tone: 'promo' }]
+};
 const FALLBACK_MENU_DATA = [
   {
     category: 'Hamburguesas Tradicionales',
@@ -39,7 +50,7 @@ const FALLBACK_MENU_DATA = [
     ]
   },
   {
-    category: 'Sándwiches',
+    category: 'Sandwich',
     items: [
       { id: 11, name: 'Milanesa Simple', price: 17300, desc: 'Pan artesanal, mayonesa, lechuga, tomate, milanesa y queso.' },
       { id: 12, name: 'Milanesa Completo', price: 18000, desc: 'Pan artesanal, mayonesa, lechuga, tomate, milanesa, queso, jamón y huevo.' },
@@ -83,16 +94,20 @@ let cart = getStoredCart();
 let featuredItems = [];
 let featuredIndex = 0;
 let featuredAutoplayId = null;
+let lastFocusedElement = null;
 
 const menuContainer = document.getElementById('menuContainer');
 const menuSection = document.querySelector('.menu-section');
-const menuHeading = menuSection.querySelector('.section-heading');
+const menuHeading = menuSection?.querySelector('.section-heading');
 const menuSearch = document.getElementById('menuSearch');
 const cartToggle = document.getElementById('cartToggle');
 const cartCount = document.getElementById('cartCount');
 const cartModal = document.getElementById('cartModal');
 const closeCartButton = document.getElementById('closeCart');
 const cartItemsContainer = document.getElementById('cartItems');
+const cartSubtotalText = document.getElementById('cartSubtotalText');
+const cartShippingText = document.getElementById('cartShippingText');
+const cartShippingRow = document.getElementById('cartShippingRow');
 const cartTotalText = document.getElementById('cartTotalText');
 const checkoutButton = document.getElementById('checkoutBtn');
 const orderNotes = document.getElementById('orderNotes');
@@ -100,11 +115,28 @@ const orderAddress = document.getElementById('orderAddress');
 const addressField = document.getElementById('addressField');
 const orderTypeInputs = document.querySelectorAll('input[name="orderType"]');
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const heroSalesPanel = document.getElementById('heroSalesPanel');
+
+function sanitizeStoredCart(storedCart) {
+  if (!Array.isArray(storedCart)) return [];
+
+  return storedCart.reduce((safeCart, item) => {
+    const id = Number(item?.id);
+    const qty = Math.min(99, Math.floor(Number(item?.qty)));
+
+    if (!Number.isInteger(id) || !Number.isFinite(qty) || qty < 1) {
+      return safeCart;
+    }
+
+    safeCart.push({ id, qty });
+    return safeCart;
+  }, []);
+}
 
 function getStoredCart() {
   try {
     const storedCart = JSON.parse(localStorage.getItem('cj_cart'));
-    return Array.isArray(storedCart) ? storedCart : [];
+    return sanitizeStoredCart(storedCart);
   } catch (error) {
     console.warn('No se pudo recuperar el carrito guardado.', error);
     return [];
@@ -153,10 +185,94 @@ function escapeHtml(text = '') {
     .replace(/'/g, '&#39;');
 }
 
+function getCurrentOrderType() {
+  return document.querySelector('input[name="orderType"]:checked')?.value || 'delivery';
+}
+
 function getAllItems() {
   return MENU_DATA.flatMap(category =>
     category.items.map(item => ({ ...item, category: category.category }))
   );
+}
+
+function isBurgerCategory(category = '') {
+  const nonBurgerCategories = new Set([
+    'sandwiches',
+    'papas fritas',
+    'promos y combos',
+    'adicionales'
+  ]);
+
+  return !nonBurgerCategories.has(normalizeText(category));
+}
+
+function getHeroBestSellers() {
+  const burgerItems = getAllItems().filter(item => isBurgerCategory(item.category));
+  const curatedItems = HERO_BEST_SELLER_IDS
+    .map(id => burgerItems.find(item => item.id === id))
+    .filter(Boolean);
+  const fallbackItems = burgerItems.filter(item => !curatedItems.some(featured => featured.id === item.id));
+
+  return [...curatedItems, ...fallbackItems].slice(0, 3);
+}
+
+function getHeroStartingPrice() {
+  const burgerPrices = getAllItems()
+    .filter(item => isBurgerCategory(item.category))
+    .map(item => Number(item.price))
+    .filter(price => Number.isFinite(price));
+
+  return burgerPrices.length ? Math.min(...burgerPrices) : null;
+}
+
+function renderHeroSalesPanel() {
+  if (!heroSalesPanel) return;
+
+  const bestSellers = getHeroBestSellers();
+  const startingPrice = getHeroStartingPrice();
+
+  if (!bestSellers.length || !Number.isFinite(startingPrice)) {
+    heroSalesPanel.hidden = true;
+    heroSalesPanel.innerHTML = '';
+    return;
+  }
+
+  heroSalesPanel.hidden = false;
+  heroSalesPanel.innerHTML = `
+    <div class="hero-sales-header">
+      <div>
+        <p class="hero-sales-kicker">Más vendidas</p>
+        <h3>Entrá por una burger y resolvé la noche.</h3>
+      </div>
+      <p class="hero-sales-from">
+        Burgers desde
+        <strong>$${formatMoney(startingPrice)}</strong>
+      </p>
+    </div>
+    <div class="hero-sales-list" role="list" aria-label="Productos más vendidos">
+      ${bestSellers.map((item, index) => `
+        <article class="hero-sales-item" role="listitem">
+          <span class="hero-sales-rank">${String(index + 1).padStart(2, '0')}</span>
+          <div class="hero-sales-item-copy">
+            <strong>${escapeHtml(item.name)}</strong>
+            <span>$${formatMoney(item.price)}</span>
+          </div>
+        </article>
+      `).join('')}
+    </div>
+  `;
+}
+
+function reconcileCartWithMenu() {
+  const itemsById = new Map(getAllItems().map(item => [item.id, item]));
+
+  cart = cart.reduce((safeCart, storedItem) => {
+    const currentItem = itemsById.get(storedItem.id);
+    if (!currentItem) return safeCart;
+
+    safeCart.push({ ...currentItem, qty: storedItem.qty });
+    return safeCart;
+  }, []);
 }
 
 function getBusinessStatus() {
@@ -175,16 +291,18 @@ function getBusinessStatus() {
 
   const openDays = new Set(['Wed', 'Thu', 'Fri', 'Sat', 'Sun']);
   const currentMinutes = Number(parts.hour) * 60 + Number(parts.minute);
-  const isOpen = openDays.has(parts.weekday) && currentMinutes >= (19 * 60 + 30) && currentMinutes < 23 * 60;
+  const isOpen = openDays.has(parts.weekday) && currentMinutes >= (20 * 60) && currentMinutes < 23 * 60;
 
   return {
     isOpen,
-    label: isOpen ? 'Abierto ahora &middot; Cierra 23:00' : 'Cerrado &middot; Abrimos de Miércoles a Domingo de 19:30 a 23:00'
+    label: isOpen ? 'Abierto ahora &middot; Cierra 23:00' : 'Cerrado &middot; Abrimos de Miércoles a Domingo de 20:00 a 23:00'
   };
 }
 
 function renderStatusBadge() {
   const headerInfo = document.querySelector('.hero-copy');
+  if (!headerInfo) return;
+
   const existingBadge = headerInfo.querySelector('.status-badge');
   existingBadge?.remove();
 
@@ -253,7 +371,8 @@ function updateFeaturedShowcase(nextIndex) {
   price.textContent = `$${formatMoney(currentItem.price)}`;
   category.textContent = currentItem.category;
   counter.textContent = `${featuredIndex + 1} / ${featuredItems.length}`;
-  addButton.dataset.itemId = String(currentItem.id);
+  addButton.dataset.id = String(currentItem.id);
+  addButton.dataset.action = 'add-to-cart';
   viewButton.dataset.target = slugify(currentItem.category);
 
   tags.innerHTML = buildIngredientTags(currentItem.desc)
@@ -310,13 +429,13 @@ function renderFeaturedShowcase() {
         <p class="featured-price" data-featured-price></p>
         <div class="featured-tags" data-featured-tags></div>
         <div class="featured-actions">
-          <button class="button button-primary" type="button" data-featured-add>Agregar al pedido</button>
+          <button class="button button-primary" type="button" data-action="add-to-cart" data-featured-add>Agregar al pedido</button>
           <button class="featured-ghost-btn" type="button" data-featured-view>Ver en la carta</button>
         </div>
         <div class="featured-controls">
           <div class="featured-nav">
-            <button class="featured-nav-btn" type="button" data-featured-prev aria-label="Ver burger anterior">‹</button>
-            <button class="featured-nav-btn" type="button" data-featured-next aria-label="Ver burger siguiente">›</button>
+            <button class="featured-nav-btn" type="button" data-featured-prev aria-label="Ver burger anterior">&lsaquo;</button>
+            <button class="featured-nav-btn" type="button" data-featured-next aria-label="Ver burger siguiente">&rsaquo;</button>
           </div>
           <div class="featured-dots" role="tablist" aria-label="Selector de burgers destacadas">
             ${featuredItems
@@ -345,10 +464,6 @@ function renderFeaturedShowcase() {
 
   let pointerStartX = 0;
   const stage = showcase.querySelector('.featured-stage');
-
-  showcase.querySelector('[data-featured-add]').addEventListener('click', event => {
-    addToCart(Number(event.currentTarget.dataset.itemId));
-  });
 
   showcase.querySelector('[data-featured-view]').addEventListener('click', event => {
     const targetId = event.currentTarget.dataset.target;
@@ -409,11 +524,17 @@ function renderFeaturedShowcase() {
 
 function createMediaMarkup(item, category) {
   if (item.image) {
-    return `<img class="item-media" src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}" loading="lazy" decoding="async">`;
+    return `
+      <div class="item-media-shell">
+        <img class="item-media" src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}" loading="lazy" decoding="async">
+        <span class="item-visual-tag">Foto real</span>
+      </div>
+    `;
   }
 
   return `
     <div class="item-media item-media--placeholder">
+      <span class="item-visual-tag item-visual-tag--placeholder">Ilustración</span>
       <div class="item-stack" aria-hidden="true">
         <span class="stack-layer bun-top"></span>
         <span class="stack-layer lettuce"></span>
@@ -426,6 +547,23 @@ function createMediaMarkup(item, category) {
         <span class="item-chip">${escapeHtml(category)}</span>
         <strong>${escapeHtml(item.name)}</strong>
       </div>
+    </div>
+  `;
+}
+
+function getItemBadges(item) {
+  return ITEM_BADGES[item.id] || [];
+}
+
+function renderItemBadges(item) {
+  const badges = getItemBadges(item);
+  if (!badges.length) return '';
+
+  return `
+    <div class="item-badges" aria-label="Etiquetas destacadas">
+      ${badges.map(badge => `
+        <span class="item-badge item-badge--${badge.tone}">${escapeHtml(badge.label)}</span>
+      `).join('')}
     </div>
   `;
 }
@@ -473,10 +611,11 @@ function renderMenu() {
           <p class="item-desc">${escapeHtml(item.desc || 'Preparado con ingredientes frescos del día.')}</p>
           <div class="item-footer">
             <p class="item-price">$${formatMoney(item.price)}</p>
-            <button class="add-btn" type="button" onclick="addToCart(${item.id})" aria-label="Agregar ${escapeHtml(item.name)} al pedido">+</button>
+            <button class="add-btn" type="button" data-action="add-to-cart" data-id="${item.id}" aria-label="Agregar ${escapeHtml(item.name)} al pedido">+</button>
           </div>
         </div>
       `;
+      itemElement.querySelector('.item-info')?.insertAdjacentHTML('afterbegin', renderItemBadges(item));
       itemsGrid.appendChild(itemElement);
     });
 
@@ -538,18 +677,24 @@ function setupScrollSpy() {
 }
 
 function syncOrderModeFields() {
-  const orderType = document.querySelector('input[name="orderType"]:checked')?.value || 'delivery';
+  const orderType = getCurrentOrderType();
   const isDelivery = orderType === 'delivery';
 
-  addressField.hidden = !isDelivery;
-  orderAddress.disabled = !isDelivery;
-  orderAddress.required = isDelivery;
+  if (addressField) addressField.hidden = !isDelivery;
+  if (orderAddress) {
+    orderAddress.disabled = !isDelivery;
+    orderAddress.required = isDelivery;
+  }
+
+  updateCart();
 }
 
 window.filterMenu = () => {
   const query = normalizeText(menuSearch.value);
   const sections = document.querySelectorAll('.menu-category-section');
   const emptyState = document.querySelector('.menu-empty-state');
+  const categoryNav = document.querySelector('.category-nav');
+  const showcase = document.querySelector('.featured-showcase');
   let visibleSectionCount = 0;
 
   sections.forEach(section => {
@@ -572,11 +717,19 @@ window.filterMenu = () => {
     emptyState.hidden = visibleSectionCount !== 0;
   }
 
+  if (categoryNav) {
+    categoryNav.hidden = visibleSectionCount === 0;
+  }
+
+  if (showcase) {
+    showcase.hidden = Boolean(query) || visibleSectionCount === 0;
+  }
+
   const firstVisibleSection = [...sections].find(section => !section.hidden);
   if (firstVisibleSection) {
     setActiveCategory(firstVisibleSection.dataset.categoryId);
   }
-};
+}
 
 function showToast(message) {
   let toast = document.querySelector('.toast');
@@ -593,7 +746,7 @@ function showToast(message) {
   showToast.timeoutId = window.setTimeout(() => toast.classList.remove('show'), 2200);
 }
 
-window.addToCart = id => {
+function addToCart(id) {
   const item = getAllItems().find(product => product.id === id);
   if (!item) return;
 
@@ -608,30 +761,50 @@ window.addToCart = id => {
   window.setTimeout(() => cartToggle.classList.remove('animate-pop'), 300);
   showToast(`${item.name} agregado al pedido.`);
   updateCart();
-};
+}
 
-window.changeQty = (id, delta) => {
+function changeQty(id, delta) {
   const item = cart.find(product => product.id === id);
   if (!item) return;
 
-  item.qty += delta;
+  const numericDelta = Number(delta);
+  if (!Number.isFinite(numericDelta)) return;
+
+  item.qty += numericDelta;
   if (item.qty <= 0) {
     cart = cart.filter(product => product.id !== id);
   }
 
   updateCart();
-};
+}
+
+function getCartFocusableElements() {
+  return [...cartModal.querySelectorAll('button:not([disabled]), [href], input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])')]
+    .filter(element => !element.hidden && element.getAttribute('aria-hidden') !== 'true');
+}
 
 function updateCart() {
-  localStorage.setItem('cj_cart', JSON.stringify(cart));
+  try {
+    const storedCart = cart.map(item => ({ id: item.id, qty: item.qty }));
+    localStorage.setItem('cj_cart', JSON.stringify(storedCart));
+  } catch (error) {
+    console.warn('No se pudo guardar el carrito.', error);
+  }
 
   const count = cart.reduce((acc, item) => acc + item.qty, 0);
-  const total = cart.reduce((acc, item) => acc + item.price * item.qty, 0);
+  const subtotal = cart.reduce((acc, item) => acc + item.price * item.qty, 0);
+  const orderType = getCurrentOrderType();
+  const isDelivery = orderType === 'delivery';
+  const total = subtotal;
 
-  cartCount.textContent = count;
-  cartCount.hidden = count === 0;
-  cartTotalText.textContent = `$${formatMoney(total)}`;
-  checkoutButton.disabled = cart.length === 0;
+  if (cartCount) {
+    cartCount.textContent = count;
+    cartCount.hidden = count === 0;
+  }
+  if (cartSubtotalText) cartSubtotalText.textContent = `$${formatMoney(subtotal)}`;
+  if (cartShippingRow) cartShippingRow.hidden = true;
+  if (cartTotalText) cartTotalText.textContent = `$${formatMoney(total)}`;
+  if (checkoutButton) checkoutButton.disabled = cart.length === 0;
 
   if (!cart.length) {
     cartItemsContainer.innerHTML = '<div class="empty-cart">Tu carrito está vacío.<br>Agregá algo rico del menú.</div>';
@@ -642,9 +815,9 @@ function updateCart() {
     <div class="cart-item">
       <span class="cart-item-name">${escapeHtml(item.name)}</span>
       <div class="qty-controls">
-        <button class="qty-btn" type="button" onclick="changeQty(${item.id}, -1)" aria-label="Restar ${escapeHtml(item.name)}">-</button>
+        <button class="qty-btn" type="button" data-action="change-qty" data-id="${item.id}" data-delta="-1" aria-label="Restar ${escapeHtml(item.name)}">-</button>
         <span>${item.qty}</span>
-        <button class="qty-btn" type="button" onclick="changeQty(${item.id}, 1)" aria-label="Sumar ${escapeHtml(item.name)}">+</button>
+        <button class="qty-btn" type="button" data-action="change-qty" data-id="${item.id}" data-delta="1" aria-label="Sumar ${escapeHtml(item.name)}">+</button>
         <span class="item-subtotal">$${formatMoney(item.price * item.qty)}</span>
       </div>
     </div>
@@ -652,15 +825,65 @@ function updateCart() {
 }
 
 function openCart() {
+  if (cartModal.classList.contains('active')) return;
+
+  lastFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : cartToggle;
   cartModal.classList.add('active');
+  cartModal.setAttribute('aria-hidden', 'false');
   document.body.classList.add('modal-open');
   cartToggle.setAttribute('aria-expanded', 'true');
+
+  window.requestAnimationFrame(() => {
+    (getCartFocusableElements()[0] || closeCartButton).focus();
+  });
 }
 
 function closeCart() {
+  if (!cartModal.classList.contains('active')) return;
+
   cartModal.classList.remove('active');
+  cartModal.setAttribute('aria-hidden', 'true');
   document.body.classList.remove('modal-open');
   cartToggle.setAttribute('aria-expanded', 'false');
+
+  const focusTarget = lastFocusedElement && typeof lastFocusedElement.focus === 'function'
+    ? lastFocusedElement
+    : cartToggle;
+
+  lastFocusedElement = null;
+  focusTarget.focus();
+}
+
+function handleModalKeydown(event) {
+  if (!cartModal.classList.contains('active')) return;
+
+  if (event.key === 'Escape') {
+    event.preventDefault();
+    closeCart();
+    return;
+  }
+
+  if (event.key !== 'Tab') return;
+
+  const focusableElements = getCartFocusableElements();
+  if (!focusableElements.length) return;
+
+  const firstElement = focusableElements[0];
+  const lastElement = focusableElements[focusableElements.length - 1];
+
+  if (!cartModal.contains(document.activeElement)) {
+    event.preventDefault();
+    firstElement.focus();
+    return;
+  }
+
+  if (event.shiftKey && document.activeElement === firstElement) {
+    event.preventDefault();
+    lastElement.focus();
+  } else if (!event.shiftKey && document.activeElement === lastElement) {
+    event.preventDefault();
+    firstElement.focus();
+  }
 }
 
 function handleCheckout() {
@@ -669,11 +892,12 @@ function handleCheckout() {
     return;
   }
 
-  const orderType = document.querySelector('input[name="orderType"]:checked')?.value || 'delivery';
+  const orderType = getCurrentOrderType();
   const isDelivery = orderType === 'delivery';
   const address = orderAddress.value.trim();
   const notes = orderNotes.value.trim();
-  const total = cart.reduce((acc, item) => acc + item.price * item.qty, 0);
+  const subtotal = cart.reduce((acc, item) => acc + item.price * item.qty, 0);
+  const total = subtotal;
 
   if (isDelivery && !address) {
     alert('Escribí la dirección de entrega para continuar.');
@@ -688,12 +912,14 @@ function handleCheckout() {
     message += `- ${item.qty}x ${item.name}\n`;
   });
 
-  message += `Total productos: $${formatMoney(total)}\n`;
+  message += `Subtotal productos: $${formatMoney(subtotal)}\n`;
 
   if (isDelivery) {
-    message += 'Envío a confirmar según dirección.\n';
+    message += `Total productos: $${formatMoney(total)}\n`;
+    message += 'Envío: A coordinar por WhatsApp.\n';
     message += `Dirección de entrega: ${address}\n`;
   } else {
+    message += `Total: $${formatMoney(total)}\n`;
     message += 'Paso a retirar por el local.\n';
   }
 
@@ -706,28 +932,79 @@ function handleCheckout() {
 
 async function init() {
   await loadMenu();
+  reconcileCartWithMenu();
   renderStatusBadge();
+  renderHeroSalesPanel();
   renderMenu();
   updateCart();
   syncOrderModeFields();
 
   document.getElementById('currentYear').textContent = new Date().getFullYear();
 
-  cartToggle.addEventListener('click', openCart);
-  closeCartButton.addEventListener('click', closeCart);
-  checkoutButton.addEventListener('click', handleCheckout);
+  checkoutButton?.addEventListener('click', handleCheckout);
+  menuSearch?.addEventListener('input', () => filterMenu());
+
+  document.addEventListener('click', event => {
+    const btn = event.target.closest('[data-action]');
+    if (!btn) return;
+
+    const id = Number(btn.dataset.id);
+    const action = btn.dataset.action;
+
+    if (action === 'add-to-cart') {
+      addToCart(id);
+    } else if (action === 'change-qty') {
+      changeQty(id, Number(btn.dataset.delta));
+    } else if (action === 'open-cart') {
+      openCart();
+    } else if (action === 'close-cart') {
+      closeCart();
+    }
+  });
 
   cartModal.addEventListener('click', event => {
     if (event.target === cartModal) closeCart();
   });
 
-  document.addEventListener('keydown', event => {
-    if (event.key === 'Escape' && cartModal.classList.contains('active')) {
-      closeCart();
-    }
-  });
+  document.addEventListener('keydown', handleModalKeydown);
 
   orderTypeInputs.forEach(input => input.addEventListener('change', syncOrderModeFields));
 }
+function setupCounters() {
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-init();
+  if (prefersReducedMotion) {
+    document.querySelectorAll('.stat-number').forEach(el => {
+      el.textContent = el.dataset.target + (el.dataset.suffix || '');
+    });
+    return;
+  }
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      const el = entry.target;
+      const target = parseInt(el.dataset.target, 10);
+      const suffix = el.dataset.suffix || '';
+      const duration = 1800;
+      const startTime = performance.now();
+
+      function update(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        el.textContent = Math.round(eased * target) + suffix;
+        if (progress < 1) requestAnimationFrame(update);
+      }
+
+      requestAnimationFrame(update);
+      observer.unobserve(el);
+    });
+  }, { threshold: 0.4 });
+
+  document.querySelectorAll('.stat-number').forEach(el => observer.observe(el));
+}
+
+// Dentro de tu función init() existente, agregá esta línea:
+// 
+init().then(setupCounters);

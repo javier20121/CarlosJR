@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Carlos JR | Delivery & Take Away</title>
+  <title>Carlos JR 🍔 | Delivery & Take Away</title>
   <meta
     name="description"
-    content="Carlos JR: hamburguesas bien cargadas, papas crocantes y noches con mucho sabor. Abierto de miÃ©rcoles a domingo de 20:00 a 23:00."
+    content="Carlos JR: hamburguesas bien cargadas, papas crocantes y noches con mucho sabor. Abierto de miércoles a domingo de 20:00 a 23:00."
   >
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,7 +24,7 @@
         </div>
       </div>
 
-      <button class="cart-toggle" id="cartToggle" type="button" aria-controls="cartModal" aria-expanded="false">
+      <button class="cart-toggle" id="cartToggle" type="button" data-action="open-cart" aria-controls="cartModal" aria-expanded="false">
         <span class="cart-toggle-label">Mi pedido</span>
         <span class="cart-count-badge" id="cartCount" aria-live="polite" hidden>0</span>
       </button>
@@ -42,6 +42,7 @@
         <div class="hero-actions">
           <a class="button button-primary" href="#menu">Ver menu</a>
         </div>
+        <div id="heroSalesPanel" class="hero-sales-panel" hidden></div>
       </div>
 
       <div class="hero-video-wrapper">
@@ -50,6 +51,10 @@
           Tu navegador no soporta videos.
         </video>
       </div>
+      <!-- Separador wave orgánico (Superpuesto al Hero) -->
+      <svg class="hero-wave" viewBox="0 0 1200 60" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0,30 C300,60 900,0 1200,30 L1200,60 L0,60 Z" fill="white"/>
+      </svg>
     </section>
   </header>
 
@@ -57,21 +62,43 @@
     <section class="highlights">
       <article class="highlight">
         <span class="highlight-number">01</span>
-        <h3>Sabor 100% Artesanal</h3>
-        <p>Medallones de carne seleccionada, smash en su punto justo y pan horneado cada dia.</p>
+        <div class="highlight-emoji">🍔</div>
+        <h3>Artesanal</h3>
+        <p>Carne fresca cada noche</p>
       </article>
 
       <article class="highlight">
         <span class="highlight-number">02</span>
-        <h3>La Parada de la Noche</h3>
-        <p>Tu punto de encuentro de miercoles a domingo para disfrutar sin vueltas.</p>
+        <div class="highlight-emoji">🌙</div>
+        <h3>De noche</h3>
+        <p>Mié a Dom, 20–23 hs</p>
       </article>
 
       <article class="highlight">
         <span class="highlight-number">03</span>
-        <h3>Ingredientes Reales</h3>
-        <p>Salsas caseras, vegetales frescos y ese toque de barrio que nos hace añicos.</p>
+        <div class="highlight-emoji">🥬</div>
+        <h3>Ingredientes reales</h3>
+        <p>Salsas y vegetales frescos</p>
       </article>
+    </section>
+
+    <section class="stats-section">
+      <div class="stats-container">
+        <div class="stats-grid">
+          <article class="stat-item">
+            <p class="stat-number" data-target="1500" data-suffix="+">0</p>
+            <p class="stat-label">Burgers Vendidas</p>
+          </article>
+          <article class="stat-item">
+            <p class="stat-number" data-target="500" data-suffix="+">0</p>
+            <p class="stat-label">Clientes Felices</p>
+          </article>
+          <article class="stat-item">
+            <p class="stat-number" data-target="5" data-suffix="★">0</p>
+            <p class="stat-label">Calificación</p>
+          </article>
+        </div>
+      </div>
     </section>
 
     <section class="schedule-section" id="horarios">
@@ -81,33 +108,13 @@
       </div>
 
       <div class="schedule-grid">
+        <div class="schedule-item open">
+          <span>Miércoles a Domingo</span>
+          <strong>20:00 a 23:00</strong>
+        </div>
         <div class="schedule-item muted">
-          <span>Lunes</span>
+          <span>Lunes y Martes</span>
           <strong>Cerrado</strong>
-        </div>
-        <div class="schedule-item muted">
-          <span>Martes</span>
-          <strong>Cerrado</strong>
-        </div>
-        <div class="schedule-item open">
-          <span>Miércoles</span>
-          <strong>20:00 a 23:00</strong>
-        </div>
-        <div class="schedule-item open">
-          <span>Jueves</span>
-          <strong>20:00 a 23:00</strong>
-        </div>
-        <div class="schedule-item open">
-          <span>Viernes</span>
-          <strong>20:00 a 23:00</strong>
-        </div>
-        <div class="schedule-item open">
-          <span>SÃ¡bado</span>
-          <strong>20:00 a 23:00</strong>
-        </div>
-        <div class="schedule-item open">
-          <span>Domingo</span>
-          <strong>20:00 a 23:00</strong>
         </div>
       </div>
     </section>
@@ -116,11 +123,8 @@
       <div class="section-heading">
         <p class="eyebrow">Menu</p>
         <h2>Nuestra Carta</h2>
-        <p class="section-text">
-          Delivery: $1.000 a $1.600 segun la zona.
-        </p>
         <div class="search-box">
-          <input type="text" id="menuSearch" placeholder="BuscÃ¡ tu burger favorita..." oninput="filterMenu()">
+          <input type="text" id="menuSearch" placeholder="Buscá tu burger favorita...">
         </div>
       </div>
 
@@ -155,7 +159,7 @@
     <div class="cart-content">
       <div class="cart-header">
         <h3 id="cartTitle">Tu Pedido</h3>
-        <button id="closeCart" type="button" aria-label="Cerrar carrito">&times;</button>
+        <button id="closeCart" type="button" data-action="close-cart" aria-label="Cerrar carrito">&times;</button>
       </div>
       <div id="cartItems"></div>
       <div class="cart-footer">
@@ -177,12 +181,82 @@
           <label for="orderNotes">¿Alguna indicación? (sin cebolla, cambio, etc.)</label>
           <textarea id="orderNotes" placeholder="Escribí acá tus aclaraciones..."></textarea>
         </div>
-        <p class="shipping-note">Envío: $1.000 a $1.600 según la zona.</p>
+        <div class="cart-totals-breakdown">
+          <div class="cart-total-row">
+            <span>Subtotal productos:</span>
+            <strong id="cartSubtotalText">$0</strong>
+          </div>
+        </div>
         <div class="cart-total">Total: <span id="cartTotalText">$0</span></div>
         <button class="button button-primary w-100" id="checkoutBtn" type="button">Pedir por WhatsApp</button>
       </div>
     </div>
   </div>
+  <section class="reviews-section">
+  <div class="section-heading">
+    <p class="eyebrow" style="color: var(--primary);">Reseñas de Google</p>
+    <h2 style="color: var(--text-dark);">Lo que dice la gente</h2>
+    <div class="reviews-rating-summary">
+      <span class="reviews-score">4.9</span>
+      <div>
+        <div class="reviews-stars-big">★★★★★</div>
+        <p class="reviews-count">Basado en reseñas reales de Google Maps</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="reviews-grid">
+
+    <article class="review-card">
+      <div class="review-header">
+        <div class="review-avatar">ED</div>
+        <div>
+          <p class="review-name">Elias Dias</p>
+          <p class="review-meta">Local Guide · 52 reseñas</p>
+        </div>
+        <img src="https://www.google.com/favicon.ico" class="review-google-icon" alt="Google">
+      </div>
+      <div class="review-stars">★★★★★</div>
+      <p class="review-text">"Carlos Jr es de esos lugares donde pedís algo y ya sabés que va a venir rico, fresco y bien hecho. Un lugar simple, rico y confiable. De esos a los que volvés porque sabés que nunca fallan."</p>
+      <p class="review-date">Hace 4 meses</p>
+    </article>
+
+    <article class="review-card">
+      <div class="review-header">
+        <div class="review-avatar">AC</div>
+        <div>
+          <p class="review-name">Anaclara Ceballos</p>
+          <p class="review-meta">12 reseñas</p>
+        </div>
+        <img src="https://www.google.com/favicon.ico" class="review-google-icon" alt="Google">
+      </div>
+      <div class="review-stars">★★★★★</div>
+      <p class="review-text">"Excelentes hamburguesas. El delivery llegó rápido, las hamburguesas estaban calientes, muy sabrosas y abundantes. Buen precio y atención muy rápida por WhatsApp."</p>
+      <p class="review-date">Hace 3 años</p>
+    </article>
+
+    <article class="review-card">
+      <div class="review-header">
+        <div class="review-avatar">BW</div>
+        <div>
+          <p class="review-name">Benja Witalij</p>
+          <p class="review-meta">5 reseñas</p>
+        </div>
+        <img src="https://www.google.com/favicon.ico" class="review-google-icon" alt="Google">
+      </div>
+      <div class="review-stars">★★★★★</div>
+      <p class="review-text">"Excelente! Pronta entrega y el producto viene en un envoltorio que te permite disfrutar como si fuera recién sacado. El delivery súper rápido y sin dudas súper ricas las hamburguesas."</p>
+      <p class="review-date">Hace 3 años</p>
+    </article>
+
+  </div>
+
+  <div class="reviews-cta">
+    <a href="https://maps.google.com/?q=Carlos+Junior+Andresito+Misiones" target="_blank" rel="noreferrer" class="reviews-cta-link">
+      Ver todas las reseñas en Google Maps
+    </a>
+  </div>
+</section>
 
     <a href="https://wa.me/5493757504214" class="whatsapp-float" target="_blank" rel="noreferrer" aria-label="WhatsApp">
     <img src="img/logo-whatsapp.png" alt="" class="whatsapp-float-icon" loading="lazy" decoding="async">
@@ -191,4 +265,3 @@
   <script src="app.js"></script>
 </body>
 </html>
-
