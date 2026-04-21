@@ -970,6 +970,19 @@ async function init() {
 
   document.getElementById('currentYear').textContent = new Date().getFullYear();
 
+  // Manejo inteligente del video en mobile
+  const sideVideo = document.querySelector('.side-video');
+  if (sideVideo) {
+    const isMobile = window.innerWidth <= 600;
+    // En conexiones lentas o mobile, pausamos el video para ahorrar datos
+    const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    const isSlowConnection = connection && (connection.saveData || connection.effectiveType === '2g' || connection.effectiveType === 'slow-2g');
+    if (isMobile || isSlowConnection) {
+      sideVideo.pause();
+      sideVideo.removeAttribute('autoplay');
+    }
+  }
+
   checkoutButton?.addEventListener('click', handleCheckout);
   menuSearch?.addEventListener('input', () => filterMenu());
 
