@@ -415,7 +415,7 @@ function renderFeaturedShowcase() {
   stopFeaturedAutoplay();
   menuSection.querySelector('.featured-showcase')?.remove();
 
-  featuredItems = getAllItems().filter(item => item.image);
+  featuredItems = getAllItems().filter(item => item.image).slice(0, 7);
   featuredIndex = 0;
 
   if (!featuredItems.length) return null;
