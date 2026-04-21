@@ -18,11 +18,11 @@
   {
     "category": "Otras Opciones Gourmet",
     "items": [
-      { "id": 7, "name": "Roma", "price": 15500, "desc": "Pan, barbacoa, cebolla caramelizada, carne, doble queso cheddar y panceta." },
-      { "id": 8, "name": "Houston", "price": 15500, "desc": "Pan, salsa de ajo, cebolla caramelizada, carne, queso azul y panceta." },
-      { "id": 9, "name": "Tokio", "price": 15500, "desc": "Pan, salsa JR, carne y doble queso cheddar." },
-      { "id": 10, "name": "Madrid", "price": 15500, "desc": "Pan, ketchup, mostaza, cebolla, pepinos, carne y doble queso cheddar." },
-      { "id": 17, "name": "Qatar", "price": 15500, "desc": "Pan, salsa de ajo, lechuga, tomate, carne, doble queso cheddar y 4 nuggets de pollo frito." },
+      { "id": 7, "name": "Roma", "price": 15500, "desc": "Pan, barbacoa, cebolla caramelizada, carne, doble queso cheddar y panceta.", "image": "img/burguer-roma.png" },
+      { "id": 8, "name": "Houston", "price": 15500, "desc": "Pan, salsa de ajo, cebolla caramelizada, carne, queso azul y panceta.", "image": "img/burguer-houston.png" },
+      { "id": 9, "name": "Tokio", "price": 15500, "desc": "Pan, salsa JR, carne y doble queso cheddar.", "image": "img/burguer-tokio.png" },
+      { "id": 10, "name": "Madrid", "price": 15500, "desc": "Pan, ketchup, mostaza, cebolla, pepinos, carne y doble queso cheddar.", "image": "img/burguer-madrid.png" },
+      { "id": 17, "name": "Qatar", "price": 15500, "desc": "Pan, salsa de ajo, lechuga, tomate, carne, doble queso cheddar y 4 nuggets de pollo frito.", "imagen": "img/burguer-qatar.png" },
       { "id": 18, "name": "Chicago", "price": 15500, "desc": "Pan, salsa JR, tomate, carne, doble queso cheddar, huevo y papas pay." },
       { "id": 19, "name": "Singapur", "price": 15500, "desc": "Pan, salsa JR, lechuga, tomate, carne, doble queso cheddar y panceta." },
       { "id": 20, "name": "Oklahoma", "price": 15500, "desc": "Pan, salsa de ajo, carne, doble queso cheddar y panceta." }

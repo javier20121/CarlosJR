@@ -36,14 +36,14 @@ const FALLBACK_MENU_DATA = [
   {
     category: 'Otras Opciones Gourmet',
     items: [
-      { id: 7, name: 'Roma', price: 15500, desc: 'Pan, barbacoa, cebolla caramelizada, carne, doble queso cheddar y panceta.' },
-      { id: 8, name: 'Houston', price: 15500, desc: 'Pan, salsa de ajo, cebolla caramelizada, carne, queso azul y panceta.' },
-      { id: 9, name: 'Tokio', price: 15500, desc: 'Pan, salsa JR, carne y doble queso cheddar.' },
-      { id: 10, name: 'Madrid', price: 15500, desc: 'Pan, ketchup, mostaza, cebolla, pepinos, carne y doble queso cheddar.' },
-      { id: 17, name: 'Qatar', price: 15500, desc: 'Pan, salsa de ajo, lechuga, tomate, carne, doble queso cheddar y 4 nuggets de pollo frito.' },
-      { id: 18, name: 'Chicago', price: 15500, desc: 'Pan, salsa JR, tomate, carne, doble queso cheddar, huevo y papas pay.' },
-      { id: 19, name: 'Singapur', price: 15500, desc: 'Pan, salsa JR, lechuga, tomate, carne, doble queso cheddar y panceta.' },
-      { id: 20, name: 'Oklahoma', price: 15500, desc: 'Pan, salsa de ajo, carne, doble queso cheddar y panceta.' }
+      { id: 7, name: 'Roma', price: 15500, desc: 'Pan, barbacoa, cebolla caramelizada, carne, doble queso cheddar y panceta.', image: 'img/burguer-roma.png' },
+      { id: 8, name: 'Houston', price: 15500, desc: 'Pan, salsa de ajo, cebolla caramelizada, carne, queso azul y panceta.', image: 'img/burguer-houston.png' },
+      { id: 9, name: 'Tokio', price: 15500, desc: 'Pan, salsa JR, carne y doble queso cheddar.', image: 'img/burguer-tokio.png' },
+      { id: 10, name: 'Madrid', price: 15500, desc: 'Pan, ketchup, mostaza, cebolla, pepinos, carne y doble queso cheddar.', image: 'img/burguer-madrid.png' },
+      { id: 17, name: 'Qatar', price: 15500, desc: 'Pan, salsa de ajo, lechuga, tomate, carne, doble queso cheddar y 4 nuggets de pollo frito.', image: 'img/burguer-qatar.png' },
+      { id: 18, name: 'Chicago', price: 15500, desc: 'Pan, salsa JR, tomate, carne, doble queso cheddar, huevo y papas pay.', image: 'img/burguer-chicago.png' },
+      { id: 19, name: 'Singapur', price: 15500, desc: 'Pan, salsa JR, lechuga, tomate, carne, doble queso cheddar y panceta.', image: 'img/burguer-singapur.png' },
+      { id: 20, name: 'Oklahoma', price: 15500, desc: 'Pan, salsa de ajo, carne, doble queso cheddar y panceta.', image: 'img/burguer-oklahoma.png' }
     ]
   },
   {
@@ -284,19 +284,21 @@ function getBusinessStatus() {
   const formatter = new Intl.DateTimeFormat('en-US', {
     timeZone: BUSINESS_TIMEZONE,
     weekday: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false
+    hour: 'numeric',
+    minute: 'numeric',
+    hourCycle: 'h23'
   });
 
-  const parts = formatter
-    .formatToParts(new Date())
-    .filter(part => part.type !== 'literal')
-    .reduce((acc, part) => ({ ...acc, [part.type]: part.value }), {});
+  const parts = formatter.formatToParts(new Date()).reduce((acc, part) => {
+    acc[part.type] = part.value;
+    return acc;
+  }, {});
 
-  const openDays = new Set(['Wed', 'Thu', 'Fri', 'Sat', 'Sun']);
-  const currentMinutes = Number(parts.hour) * 60 + Number(parts.minute);
-  const isOpen = openDays.has(parts.weekday) && currentMinutes >= (20 * 60) && currentMinutes < 23 * 60;
+  const currentDay = parts.weekday.replace('.', '').trim(); // Limpia "Sun." a "Sun"
+  const currentMinutes = parseInt(parts.hour, 10) * 60 + parseInt(parts.minute, 10);
+  const openDays = ['Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  
+  const isOpen = openDays.includes(currentDay) && currentMinutes >= (20 * 60) && currentMinutes < (23 * 60);
 
   return {
     isOpen,
@@ -532,26 +534,41 @@ function createMediaMarkup(item, category) {
     return `
       <div class="item-media-shell">
         <img class="item-media" src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}" loading="lazy" decoding="async">
-        <span class="item-visual-tag">Foto real</span>
+        <span class="item-visual-tag">Imagen de referencia</span>
       </div>
     `;
   }
 
+  // Lógica de búsqueda de referencia: busca el producto con foto más parecido por ingredientes
+  const allItemsWithImages = getAllItems().filter(i => i.image);
+  const targetIngredients = buildIngredientTags(item.desc || '');
+  let referenceImage = null;
+  let maxScore = -1;
+
+  allItemsWithImages.forEach(refItem => {
+    const refIngredients = buildIngredientTags(refItem.desc || '');
+    let score = 0;
+    targetIngredients.forEach(ing => {
+      if (refIngredients.includes(ing)) score += 2;
+    });
+    if (refItem.category === category) score += 1;
+    if (score > maxScore && score > 0) {
+      maxScore = score;
+      referenceImage = refItem.image;
+    }
+  });
+
+  // Si no se encuentra nada parecido, generamos una imagen gourmet basada en la categoría
+  if (!referenceImage) {
+    const categoryLower = normalizeText(category);
+    const keyword = categoryLower.includes('papas') ? 'fries' : 'burger';
+    referenceImage = `https://loremflickr.com/400/300/${keyword},food/all?lock=${item.id}`;
+  }
+
   return `
-    <div class="item-media item-media--placeholder">
-      <span class="item-visual-tag item-visual-tag--placeholder">Ilustración</span>
-      <div class="item-stack" aria-hidden="true">
-        <span class="stack-layer bun-top"></span>
-        <span class="stack-layer lettuce"></span>
-        <span class="stack-layer tomato"></span>
-        <span class="stack-layer cheese"></span>
-        <span class="stack-layer patty"></span>
-        <span class="stack-layer bun-bottom"></span>
-      </div>
-      <div class="item-placeholder-copy">
-        <span class="item-chip">${escapeHtml(category)}</span>
-        <strong>${escapeHtml(item.name)}</strong>
-      </div>
+    <div class="item-media-shell">
+      <img class="item-media item-media--reference" src="${escapeHtml(referenceImage)}" alt="${escapeHtml(item.name)}" loading="lazy" decoding="async">
+      <span class="item-visual-tag item-visual-tag--placeholder">Imagen de referencia</span>
     </div>
   `;
 }

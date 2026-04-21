@@ -962,6 +962,11 @@ h1, h2, h3, .brand-mark, .eyebrow { font-family: 'Bebas Neue', sans-serif; text-
   transition: transform 0.45s ease;
 }
 
+.item-media--reference {
+  filter: saturate(0.8) brightness(0.95);
+  opacity: 0.9;
+}
+
 .item-visual-tag {
   position: absolute;
   top: 0.8rem;
@@ -1688,6 +1693,12 @@ body.modal-open .whatsapp-float {
 @media (max-width: 480px) {
   .stats-grid { grid-template-columns: 1fr; }
 }
+
+.reviews-section {
+  background: white;
+  padding-bottom: 2rem;
+}
+
 .reviews-rating-summary {
   display: flex;
   align-items: center;
