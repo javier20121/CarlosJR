@@ -22,37 +22,37 @@
       { "id": 8, "name": "Houston", "price": 15500, "desc": "Pan, salsa de ajo, cebolla caramelizada, carne, queso azul y panceta.", "image": "img/burguer-houston.png" },
       { "id": 9, "name": "Tokio", "price": 15500, "desc": "Pan, salsa JR, carne y doble queso cheddar.", "image": "img/burguer-tokio.png" },
       { "id": 10, "name": "Madrid", "price": 15500, "desc": "Pan, ketchup, mostaza, cebolla, pepinos, carne y doble queso cheddar.", "image": "img/burguer-madrid.png" },
-      { "id": 17, "name": "Qatar", "price": 15500, "desc": "Pan, salsa de ajo, lechuga, tomate, carne, doble queso cheddar y 4 nuggets de pollo frito.", "imagen": "img/burguer-qatar.png" },
-      { "id": 18, "name": "Chicago", "price": 15500, "desc": "Pan, salsa JR, tomate, carne, doble queso cheddar, huevo y papas pay." },
-      { "id": 19, "name": "Singapur", "price": 15500, "desc": "Pan, salsa JR, lechuga, tomate, carne, doble queso cheddar y panceta." },
-      { "id": 20, "name": "Oklahoma", "price": 15500, "desc": "Pan, salsa de ajo, carne, doble queso cheddar y panceta." }
+      { "id": 17, "name": "Qatar", "price": 15500, "desc": "Pan, salsa de ajo, lechuga, tomate, carne, doble queso cheddar y 4 nuggets de pollo frito.", "image": "img/burguer-qatar.png" },
+      { "id": 18, "name": "Chicago", "price": 15500, "desc": "Pan, salsa JR, tomate, carne, doble queso cheddar, huevo y papas pay.", "image": "img/burguer-chicago.png" },
+      { "id": 19, "name": "Singapur", "price": 15500, "desc": "Pan, salsa JR, lechuga, tomate, carne, doble queso cheddar y panceta.", "image": "img/burguer-singapur.png" },
+      { "id": 20, "name": "Oklahoma", "price": 15500, "desc": "Pan, salsa de ajo, carne, doble queso cheddar y panceta.", "image": "img/burguer-oklahoma.png" }
     ]
   },
   {
     "category": "Vegetarianas",
     "items": [
-      { "id": 21, "name": "Dakota", "price": 9900, "desc": "Pan, salsa de ajo, pepinos, lechuga, tomate, medallón vegetariano y doble queso cheddar." },
-      { "id": 22, "name": "Tijuana", "price": 8700, "desc": "Pan, salsa JR, pepinos, medallón vegetariano y doble queso cheddar." },
-      { "id": 23, "name": "Orlando", "price": 9900, "desc": "Pan, salsa JR, cebolla caramelizada, medallón vegetariano y queso azul." }
+      { "id": 21, "name": "Dakota", "price": 9900, "desc": "Pan, salsa de ajo, pepinos, lechuga, tomate, medallón vegetariano y doble queso cheddar.", "image": "img/burguer-dakota.png" },
+      { "id": 22, "name": "Tijuana", "price": 8700, "desc": "Pan, salsa JR, pepinos, medallón vegetariano y doble queso cheddar.", "image": "img/burguer-tijuana.png" },
+      { "id": 23, "name": "Orlando", "price": 9900, "desc": "Pan, salsa JR, cebolla caramelizada, medallón vegetariano y queso azul.", "image": "img/burguer-orlando.png" }
     ]
   },
   {
     "category": "Sándwiches",
     "items": [
-      { "id": 11, "name": "Milanesa Simple", "price": 17300, "desc": "Pan artesanal, mayonesa, lechuga, tomate, milanesa y queso." },
-      { "id": 12, "name": "Milanesa Completo", "price": 18000, "desc": "Pan artesanal, mayonesa, lechuga, tomate, milanesa, queso, jamón y huevo." },
-      { "id": 13, "name": "Lomito Simple", "price": 17300, "desc": "Pan artesanal, mayonesa, lechuga, tomate, lomo vacuno y queso." },
-      { "id": 24, "name": "Lomito Completo", "price": 18000, "desc": "Pan artesanal, mayonesa, lechuga, tomate, lomo vacuno, queso, jamón y huevo." }
+      { "id": 11, "name": "Milanesa Simple", "price": 17300, "desc": "Pan artesanal, mayonesa, lechuga, tomate, milanesa y queso.", "image": "img/burguer-milanesa-simple.png" },
+      { "id": 12, "name": "Milanesa Completo", "price": 18000, "desc": "Pan artesanal, mayonesa, lechuga, tomate, milanesa, queso, jamón y huevo.", "image": "img/burguer-milanesa-completo.png" },
+      { "id": 13, "name": "Lomito Simple", "price": 17300, "desc": "Pan artesanal, mayonesa, lechuga, tomate, lomo vacuno y queso.", "image": "img/burguer-lomito-simple.png" },
+      { "id": 24, "name": "Lomito Completo", "price": 18000, "desc": "Pan artesanal, mayonesa, lechuga, tomate, lomo vacuno, queso, jamón y huevo.", "image": "img/burguer-lomito-completo.png" }
     ]
   },
   {
     "category": "Papas Fritas",
     "items": [
-      { "id": 25, "name": "Porción Individual (con burger)", "price": 1500, "desc": "Papa chica con precio especial acompañando una hamburguesa." },
-      { "id": 26, "name": "Porción Individual (sola)", "price": 2000, "desc": "Papa chica para pedir sola." },
-      { "id": 16, "name": "Tradicional", "price": 9300, "desc": "Papas fritas clásicas, porción para dos." },
-      { "id": 14, "name": "Con Queso", "price": 13200, "desc": "Papas fritas con queso cheddar o muzzarella." },
-      { "id": 15, "name": "Queso y Bacon", "price": 15900, "desc": "Papas fritas con queso cheddar o muzzarella y panceta picada." }
+      { "id": 25, "name": "Porción Individual (con burger)", "price": 1500, "desc": "Papa chica con precio especial acompañando una hamburguesa.", "image": "img/burguer-papa-individual.png" },
+      { "id": 26, "name": "Porción Individual (sola)", "price": 2000, "desc": "Papa chica para pedir sola.", "image": "img/burguer-papa-individual-sola.png" },
+      { "id": 16, "name": "Tradicional", "price": 9300, "desc": "Papas fritas clásicas, porción para dos.", "image": "img/burguer-papa-tradicional.png" },
+      { "id": 14, "name": "Con Queso", "price": 13200, "desc": "Papas fritas con queso cheddar o muzzarella.", "image": "img/burguer-papa-con-queso.png" },
+      { "id": 15, "name": "Queso y Bacon", "price": 15900, "desc": "Papas fritas con queso cheddar o muzzarella y panceta picada.", "image": "img/burguer-papa-queso-bacon.png" }
     ]
   },
   {
