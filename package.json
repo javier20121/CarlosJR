@@ -1,0 +1,12 @@
+{
+  "name": "carlos-jr",
+  "version": "1.0.0",
+  "description": "Carlos JR - Hamburgueseria",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build-analytics.js"
+  },
+  "dependencies": {
+    "@vercel/analytics": "^2.0.1"
+  }
+}
